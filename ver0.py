@@ -51,8 +51,10 @@ def upAndDown(replayLog, metaLog):
   try:
       drone.wait(1.0)
       drone.takeoff()
-      drone.wait(1.0)
-      drone.turnRight(24.0)
+      drone.setVideoChannel( front=False )
+      drone.hover(1.0)
+      drone.turnRight(10.0)
+      drone.setVideoChannel( front=True )
       drone.hover(1.0)
       #for i in xrange(10):
        #   print drone.time, drone.acc, drone.coord
