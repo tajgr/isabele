@@ -4,12 +4,17 @@
   usage:
        ./ver0.py fly
 """
-# martin knihovny
-from ardrone2 import ARDrone2, ManualControlException, manualControl
-from sourcelogger import SourceLogger
-import sys
 import pygame
 import datetime
+
+import sys
+import os
+
+# martin knihovny
+sys.path.append( ".."+os.sep+"heidi") 
+from ardrone2 import ARDrone2, ManualControlException, manualControl
+from sourcelogger import SourceLogger
+
 
 def pygameTest():
     pygame.init()
