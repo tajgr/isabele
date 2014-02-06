@@ -10,7 +10,7 @@ import datetime
 import sys
 import os
 
-# martin knihovny
+# martin libraries
 sys.path.append( ".."+os.sep+"heidi") 
 from ardrone2 import ARDrone2, ManualControlException, manualControl
 from sourcelogger import SourceLogger
