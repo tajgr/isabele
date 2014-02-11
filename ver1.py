@@ -6,6 +6,8 @@
 """
 import pygame
 import datetime
+import multiprocessing
+
 
 import sys
 import os
@@ -14,6 +16,12 @@ import os
 sys.path.append( ".."+os.sep+"heidi") 
 from ardrone2 import ARDrone2, ManualControlException, manualControl
 from sourcelogger import SourceLogger
+
+
+def timeName( prefix, ext ):
+  dt = datetime.datetime.now()
+  filename = prefix + dt.strftime("%y%m%d_%H%M%S.") + ext
+  return filename
 
 
 def pygameTest():
@@ -41,13 +49,33 @@ def linuxKbHit():
 	return False
      
 
+TEMP_FILE = "tmp.bin"
+
+def wrapper( packet ):
+  open( TEMP_FILE, "ab" ).write( packet )
+
+
+# very very ugly :(
+queueResults = multiprocessing.Queue()
+
+def getOrNone():
+  if queueResults.empty():
+    return None
+  return queueResults.get()
+
+
 def upAndDown(replayLog, metaLog):
   if replayLog == None:
       pygame.init()
       screen = pygame.display.set_mode((100,100))
+
   #drone = ARDrone2(replayLog = "logs/navdata_140128_175017.log.gz")
   drone = ARDrone2(replayLog, metaLog = metaLog, console = linuxKbHit, speed = 0.1)
-  drone.startVideo()
+  if replayLog == None:
+      name = timeName( "logs/src_cv2_", "log" ) 
+      metaLog.write("cv2: "+name+'\n' )
+      loggedResult = SourceLogger( getOrNone, name ).get
+      drone.startVideo( wrapper, queueResults, record=True )
   try:
       drone.wait(1.0)
       drone.takeoff()
