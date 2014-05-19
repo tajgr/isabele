@@ -1,8 +1,8 @@
 #!/usr/bin/python
 """
-  First test with ardrone "Isabel"
-  usage:
-       ./ver0.py fly
+    Manual control flying via pygame.
+        usage:
+            python manulal_control.py <TODO>
 """
 
 import datetime
