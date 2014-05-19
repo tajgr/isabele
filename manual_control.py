@@ -12,6 +12,7 @@ import multiprocessing
 import cv2
 import math
 import numpy as np
+import pygame
 
 # martin libraries
 sys.path.append( ".."+os.sep+"heidi") 
@@ -19,8 +20,9 @@ sys.path.append( ".."+os.sep+"heidi")
 
 from sourcelogger import SourceLogger
 from ardrone2 import ARDrone2, ManualControlException, manualControl, normalizeAnglePIPI, distance
+from rr_drone import timeName, getOrNone, wrapper
 
-
+g_queueResults = multiprocessing.Queue()
 
 class ManualControlLinux( ARDrone2 ):
     def __init__( self, replayLog=None, speed = 0.2, skipConfigure=False, metaLog=None, console=None ):
