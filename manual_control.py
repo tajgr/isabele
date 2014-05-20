@@ -75,12 +75,12 @@ def manualControlPygame( drone, desiredHeight = 2.0 ):
 		elif event.key == pygame.K_PAGEUP:
 		    print "K_PAGEUP"
                     desiredHeight = desiredHeight + heightStep
-                    print "Current desired height " desiredHeight
+                    print "Current desired height ", desiredHeight
                     
 		elif event.key == pygame.K_PAGEDOWN:
 		    print "K_PAGEDOWN"
                     desiredHeight = desiredHeight - heightStep
-                    print "Current desired height " desiredHeight
+                    print "Current desired height ", desiredHeight
 		
                 elif event.key == pygame.K_SPACE:
 		    print "K_SPACE"
