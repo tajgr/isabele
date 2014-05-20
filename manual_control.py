@@ -47,54 +47,55 @@ class ManualControlLinux( ARDrone2 ):
             self.lastImageResult = self.loggedVideoResult()
 
 def manualControlPygame( drone, desiredHeight = 2.0 ):
-    speed = 0.2
+    speed = 0.1
+    speedA = 0.4
     heightStep = 0.1
     sx, sy, sz, sa = 0, 0, 0, 0
     while 1:
         events = pygame.event.get()
 #        print events
         for event in events:
-            print event
+            #print event
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    print "K_LEFT"
-                    sa = -speed
+                    #print "K_LEFT"
+                    sa = speedA
                     
                 elif event.key == pygame.K_RIGHT:
-                    print "K_RIGHT"
-                    sa = speed
+                    #print "K_RIGHT"
+                    sa = -speedA
                 
 		elif event.key == pygame.K_DOWN:
-		    print "K_DOWN"
+		    #print "K_DOWN"
                     sx = -speed
 		
 		elif event.key == pygame.K_UP:
-		    print "K_UP"
+		    #print "K_UP"
                     sx = speed
 		
 		elif event.key == pygame.K_PAGEUP:
-		    print "K_PAGEUP"
+		    #print "K_PAGEUP"
                     desiredHeight = desiredHeight + heightStep
                     print "Current desired height ", desiredHeight
                     
 		elif event.key == pygame.K_PAGEDOWN:
-		    print "K_PAGEDOWN"
+		    #print "K_PAGEDOWN"
                     desiredHeight = desiredHeight - heightStep
                     print "Current desired height ", desiredHeight
 		
                 elif event.key == pygame.K_SPACE:
-		    print "K_SPACE"
+		    #print "K_SPACE"
                     drone.hover( 0.5 )
                     
                 elif event.key == pygame.K_RETURN:
-		    print "K_RETURN"
+		    #print "K_RETURN"
 		    return
                 
                 else:
 		    return
             if event.type == pygame.KEYUP:
                 sx, sy, sz, sa = 0, 0, 0, 0
-        
+         
         altitude = desiredHeight
         if drone.altitudeData != None:
             altVision = drone.altitudeData[0]/1000.0
@@ -116,11 +117,12 @@ def flyIsabelle( drone ):
         drone.takeoff()
         drone.hover(1.0)
         drone.setVideoChannel( front=False )
+        drone.hover( 10.0)
     except ManualControlException, e:
         print "ManualControlException"
         manualControlPygame( drone )
-        drone.hover(0.5)
-        drone.land()
+    drone.hover(0.5)
+    drone.land()
     drone.wait(1.0)
     drone.stopVideo()
 
