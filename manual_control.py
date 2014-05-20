@@ -22,6 +22,7 @@ from sourcelogger import SourceLogger
 from ardrone2 import ARDrone2, ManualControlException, manualControl, normalizeAnglePIPI, distance
 from rr_drone import timeName, getOrNone, wrapper
 
+
 g_queueResults = multiprocessing.Queue()
 
 class ManualControlLinux( ARDrone2 ):
@@ -45,37 +46,41 @@ class ManualControlLinux( ARDrone2 ):
         if self.loggedVideoResult != None:
             self.lastImageResult = self.loggedVideoResult()
 
-def manualControlPygame( drone ):
+def manualControlPygame( drone, desiredHeight = 2.0 ):
     speed = 0.2
-    speedUpDown = 0.2
+    heightStep = 0.1
+    sx, sy, sz, sa = 0, 0, 0, 0
     while 1:
         events = pygame.event.get()
 #        print events
         for event in events:
-	    print event
+            print event
             if event.type == pygame.KEYDOWN:
-		if event.key == pygame.K_LEFT:
-		    print "K_LEFT"
-		    drone.moveXYZA( 0, 0, 0, -speed )		
-		elif event.key == pygame.K_RIGHT:
-		    print "K_RIGHT"
-		    drone.moveXYZA( 0, 0, 0, speed )
-		
+                if event.key == pygame.K_LEFT:
+                    print "K_LEFT"
+                    sa = -speed
+                    
+                elif event.key == pygame.K_RIGHT:
+                    print "K_RIGHT"
+                    sa = speed
+                
 		elif event.key == pygame.K_DOWN:
 		    print "K_DOWN"
-		    drone.moveXYZA( -speed, 0, 0, 0 )
+                    sx = -speed
 		
 		elif event.key == pygame.K_UP:
 		    print "K_UP"
-		    drone.moveXYZA( speed, 0, 0, 0 )
+                    sx = speed
 		
 		elif event.key == pygame.K_PAGEUP:
 		    print "K_PAGEUP"
-		    drone.moveXYZA( 0, 0, speedUpDown, 0 )
-		
+                    desiredHeight = desiredHeight + heightStep
+                    print "Current desired height " desiredHeight
+                    
 		elif event.key == pygame.K_PAGEDOWN:
 		    print "K_PAGEDOWN"
-		    drone.moveXYZA( 0, 0, -speedUpDown, 0 )
+                    desiredHeight = desiredHeight - heightStep
+                    print "Current desired height " desiredHeight
 		
                 elif event.key == pygame.K_SPACE:
 		    print "K_SPACE"
@@ -87,8 +92,21 @@ def manualControlPygame( drone ):
                 
                 else:
 		    return
-	    else:
-		drone.update()
+            if event.type == pygame.KEYUP:
+                sx, sy, sz, sa = 0, 0, 0, 0
+        
+        altitude = desiredHeight
+        if drone.altitudeData != None:
+            altVision = drone.altitudeData[0]/1000.0
+            altSonar = drone.altitudeData[3]/1000.0
+            altitude = (altSonar+altVision)/2.0
+            if abs(altSonar-altVision) > 0.5:
+                print altSonar, altVision
+                altitude = max( altSonar, altVision ) # sonar is 0.0 sometimes (no ECHO)
+
+        sz = max( -0.2, min( 0.2, desiredHeight - altitude ))
+        
+        drone.moveXYZA( sx, sy, sz, sa )
 
 
 
