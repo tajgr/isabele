@@ -114,9 +114,8 @@ def manualControlPygame( drone, desiredHeight = 2.0 ):
 def flyIsabelle( drone ):
     try:
         drone.wait(1.0)
-        drone.takeoff()
-        drone.hover(1.0)
         drone.setVideoChannel( front=False )
+        drone.takeoff()
         drone.hover( 10.0)
     except ManualControlException, e:
         print "ManualControlException"
@@ -125,6 +124,7 @@ def flyIsabelle( drone ):
     drone.land()
     drone.wait(1.0)
     drone.stopVideo()
+    print "Battery", drone.battery
 
 if __name__ == "__main__":
     import launcher
