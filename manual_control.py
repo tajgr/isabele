@@ -29,7 +29,7 @@ class ManualControlLinux( ARDrone2 ):
     def __init__( self, replayLog=None, speed = 0.2, skipConfigure=False, metaLog=None, console=None ):
         self.loggedVideoResult = None
         self.lastImageResult = None
-        self.videoHighResolution = True
+        self.videoHighResolution = False
         ARDrone2.__init__( self, replayLog, speed, skipConfigure, metaLog, console )
         if replayLog == None:
             name = timeName( "logs/src_cv2_", "log" ) 
@@ -48,6 +48,7 @@ class ManualControlLinux( ARDrone2 ):
 
 def manualControlPygame( drone, desiredHeight = 2.0 ):
     speed = 0.1
+    speedY = 0.1
     speedA = 0.4
     heightStep = 0.1
     sx, sy, sz, sa = 0, 0, 0, 0
@@ -73,15 +74,21 @@ def manualControlPygame( drone, desiredHeight = 2.0 ):
 		    #print "K_UP"
                     sx = speed
 		
-		elif event.key == pygame.K_PAGEUP:
+		elif event.key == pygame.K_u:
 		    #print "K_PAGEUP"
                     desiredHeight = desiredHeight + heightStep
                     print "Current desired height ", desiredHeight
                     
-		elif event.key == pygame.K_PAGEDOWN:
+		elif event.key == pygame.K_d:
 		    #print "K_PAGEDOWN"
                     desiredHeight = desiredHeight - heightStep
                     print "Current desired height ", desiredHeight
+                
+                elif event.key == pygame.K_PAGEDOWN:
+                    sy = speedY
+                
+                elif event.key == pygame.K_PAGEUP:
+                    sy = -speedY
 		
                 elif event.key == pygame.K_SPACE:
 		    #print "K_SPACE"
