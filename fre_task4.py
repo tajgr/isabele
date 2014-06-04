@@ -6,11 +6,15 @@
 """
 # based on airrace_drone.py
 import sys
+import os
 import datetime
 import multiprocessing
 import cv2
 import math
 import numpy as np
+
+# martin libraries
+sys.path.append( ".."+os.sep+"heidi") 
 
 from pave import PaVE, isIFrame, frameNumber, timestamp, correctTimePeriod, frameEncodedWidth, frameEncodedHeight
 
@@ -35,8 +39,6 @@ def getOrNone():
     if g_queueResults.empty():
         return None
     return g_queueResults.get()
-
-
 
 
 def wrapper( packet ):
@@ -66,9 +68,7 @@ def wrapper( packet ):
 
 g_queueResults = multiprocessing.Queue()
 
-
-
-class RobotemRovneDrone( ARDrone2 ):
+class FreTask4Drone( ARDrone2 ):
   def __init__( self, replayLog=None, speed = 0.2, skipConfigure=False, metaLog=None, console=None ):
     self.loggedVideoResult = None
     self.lastImageResult = None
@@ -90,11 +90,17 @@ class RobotemRovneDrone( ARDrone2 ):
       self.lastImageResult = self.loggedVideoResult()
 
 
+def processFrame( frame, debug=False ):
+    pass
+
 def freTask4( ):
     pass
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[1] == "img":
+        imgmain( sys.argv[1:], processFrame )
+        sys.exit( 0 )
     import launcher
-    launcher.launch( sys.argv, ManualControlLinux, flyIsabelle )
+    launcher.launch( sys.argv, FreTask4Drone, freTask4 )
      
