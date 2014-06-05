@@ -28,6 +28,7 @@ from airrace import main as imgmain # image debugging TODO move to launcher
 from airrace import saveIndexedImage, FRAMES_PER_INDEX
 
 import cvideo
+import cimg
 
 
 MAX_ALLOWED_SPEED = 0.8
@@ -122,7 +123,9 @@ class FreTask4Drone( ARDrone2 ):
 
 
 def processFrame( frame, debug=False ):
-    pass
+    cimg.green( frame, 1.1 )
+    cv2.imshow('image', frame)
+    saveIndexedImage( frame )
 
 def freTask4(drone):
     drone.speed = 0.1
