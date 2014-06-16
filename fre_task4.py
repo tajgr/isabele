@@ -34,6 +34,7 @@ import cimg
 MAX_ALLOWED_SPEED = 0.8
 MAX_ALLOWED_VIDEO_DELAY = 2.0 # in seconds, then it will wait (desiredSpeed = 0.0)
 
+g_mser = None
 
 def timeName( prefix, ext ):
     dt = datetime.datetime.now()
@@ -123,9 +124,34 @@ class FreTask4Drone( ARDrone2 ):
 
 
 def processFrame( frame, debug=False ):
-    cimg.green( frame, 1.1 )
-    cv2.imshow('image', frame)
-    saveIndexedImage( frame )
+#    rectangles = []
+#    cimg.green( frame, 0.9 )
+#    global g_mser
+#    if g_mser == None:
+#        g_mser = cv2.MSER( _delta = 10, _min_area=100, _max_area=360*250 )
+#    b, g, r, = cv2.split( frame )
+#    gray = g
+#    contours = g_mser.detect(gray, None)
+#    print len( contours )
+#    for cnt in contours:
+#        if len(cnt) > 10000:
+#            print len(cnt)
+#            rect = cv2.minAreaRect(cnt)
+#            print rect
+##        sys.exit()
+#            rectangles.append(rect)
+#    print "len(rectangles)"+str( len( rectangles ) )
+#    if debug:
+##        cv2.polylines(frame, contours, 2, (0, 255, 0), 2)
+#        for rect in rectangles:
+#            box = cv2.cv.BoxPoints(rect)
+#            box = np.int0(box)
+#            cv2.drawContours( frame,[box],0,(0,0,255),2)
+#        cv2.imshow('image', frame)
+#        saveIndexedImage( frame )
+    refLine = [0, 0, 1, 1]
+    return refLine
+
 
 def freTask4(drone):
     drone.speed = 0.1
@@ -138,7 +164,53 @@ def freTask4(drone):
         drone.setVideoChannel( front=False )
         downloadOldVideo( drone, timeout=20.0 )
         drone.takeoff()
-        drone.hover(20.0)
+        startTime = drone.time
+            while drone.time < startTime + 1.0:
+                drone.update("AT*PCMD=%i,0,0,0,0,0\r") # drone.hover(1.0)
+                # TODO sonar/vision altitude
+                poseHistory.append( (drone.time, (drone.coord[0], drone.coord[1], drone.heading), (drone.angleFB, drone.angleLR), None) )
+        magnetoOnStart = drone.magneto[:3]
+        print "NAVI-ON"
+        startTime = drone.time
+        sx,sy,sz,sa = 0,0,0,0
+        lastUpdate = None
+        while drone.time < startTime + 600.0:
+            altitude = desiredHeight
+            if drone.altitudeData != None:
+                altVision = drone.altitudeData[0]/1000.0
+                altSonar = drone.altitudeData[3]/1000.0
+                altitude = (altSonar+altVision)/2.0
+                if abs(altSonar-altVision) > 0.5:
+                    print altSonar, altVision
+                    altitude = max( altSonar, altVision ) # sonar is 0.0 sometimes (no ECHO)
+
+            sz = max( -0.2, min( 0.2, desiredHeight - altitude ))
+            if altitude > 2.5:
+                # wind and "out of control"
+                sz = max( -0.5, min( 0.5, desiredHeight - altitude ))
+            sx = max( 0, min( drone.speed, desiredSpeed - drone.vx ))
+
+            if drone.lastImageResult:
+                lastUpdate = drone.time
+                assert len( drone.lastImageResult ) == 2 and len( drone.lastImageResult[0] ) == 2, drone.lastImageResult
+                (frameNumber, timestamp), rects = drone.lastImageResult
+                viewlog.dumpVideoFrame( frameNumber, timestamp )
+                #TODO
+                # keep history small
+                videoTime = correctTimePeriod( timestamp/1000., ref=drone.time )
+                videoDelay = drone.time - videoTime
+                if videoDelay > 1.0:
+                    print "!DANGER! - video delay", videoDelay
+                maxVideoDelay = max( videoDelay, maxVideoDelay )
+                toDel = 0
+                for oldTime, oldPose, oldAngles, oldAltitude in poseHistory:
+                    toDel += 1
+                    if oldTime >= videoTime:
+                        break
+                poseHistory = poseHistory[:toDel]
+                
+                print "FRAME", frameNumber/15
+#                TODO
 
     except ManualControlException, e:
         print "ManualControlException"
